@@ -28,18 +28,70 @@
         <div class="frame-inner">
           <section class="top">
             <div class="dropdown">
-              <img class="undraggable" src="src/Dropdown.png" />
-              <div class="dropdown-content">
-                <a href="#">Item 1</a>
-                <a href="#">Item 2</a>
-                <a href="#">Item 3</a>
+              <img
+                class="undraggable"
+                src="src/Dropdown.png"
+                alt="Menu roślin"
+              />
+              <div class="dropdown-content" id="plants-dropdown-content">
+                <a href="#" id="add-plant-link" class="dropdown-item"
+                  >+ Add New Plant</a
+                >
+                <div id="plant-form-container">
+                  <h3>Add New Plant</h3>
+                  <form id="add-plant-form">
+                    <div>
+                      <label for="plant-name">Name:</label>
+                      <input type="text" id="plant-name" required />
+                    </div>
+                    <div>
+                      <label for="plant-species">Species:</label>
+                      <input type="text" id="plant-species" required />
+                    </div>
+                    <div>
+                      <label for="plant-description"
+                        >Description (optional):</label
+                      >
+                      <textarea id="plant-description"></textarea>
+                    </div>
+                    <div>
+                      <label for="plant-wikipedia-url"
+                        >Wikipedia URL (optional):</label
+                      >
+                      <input
+                        type="url"
+                        id="plant-wikipedia-url"
+                        placeholder="https://en.wikipedia.org/wiki/Monstera"
+                      />
+                    </div>
+                    <div>
+                      <label for="plant-cover-image"
+                        >Cover Image URL (optional):</label
+                      >
+                      <input
+                        type="url"
+                        id="plant-cover-image"
+                        placeholder="e.g. src/my_plant.webp"
+                      />
+                    </div>
+                    <button type="submit">Add Plant</button>
+                  </form>
+                  <hr />
+                </div>
+                <ul id="plants-list">
+                  <li>Loading plants...</li>
+                </ul>
               </div>
             </div>
             <h5>Moje roślinki</h5>
+
             <div class="dropdown-left">
-              <img class="undraggable" src="src/More.svg" />
+              <img class="undraggable" src="src/More.svg" alt="Więcej opcji" />
               <div class="dropdown-content">
-                <a href="https://en.wikipedia.org/wiki/Monstera_deliciosa"
+                <a
+                  href="https://en.wikipedia.org/wiki/Monstera_deliciosa"
+                  id="wikipedia-link"
+                  target="_blank"
                   >Wikipedia</a
                 >
               </div>
@@ -57,7 +109,6 @@
           <section class="description">
             <h3>Marlena</h3>
             <h5>Monstera deliciosa</h5>
-            <!-- Cover and Description start-->
           </section>
           <section class="progress">
             <div class="progress-bar">
@@ -77,8 +128,6 @@
             </button>
             <button><img class="undraggable btn" src="src/next.png" /></button>
           </section>
-          <!-- Cover and Description end-->
-          <!-- Callendar start-->
           <section class="callendar">
             <div class="calendar">
               <div class="calendar-header">
@@ -100,7 +149,6 @@
               </div>
             </div>
           </section>
-          <!-- Callendar end-->
         </div>
       </div>
       <div class="background"></div>
