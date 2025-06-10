@@ -423,4 +423,10 @@ button {
     bottom: 0;
     left: 0;
   }
+  .auth-info {
+    display: flex;
+  }
+  .user-display {
+    padding-right: 10px;
+  }
 }

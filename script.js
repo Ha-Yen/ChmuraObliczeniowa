@@ -334,3 +334,113 @@ document.addEventListener("DOMContentLoaded", () => {
 
 prevMonthButton.addEventListener("click", goToPreviousMonth);
 nextMonthButton.addEventListener("click", goToNextMonth);
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const loginGithubBtn = document.getElementById("login-github");
+  const logoutBtn = document.getElementById("logout");
+  const userDisplay = document.getElementById("user-display");
+
+  // Funkcja do pobierania informacji o użytkowniku
+  async function getUserInfo() {
+    try {
+      const response = await fetch("/.auth/me");
+      const data = await response.json();
+      return data.clientPrincipal;
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      return null;
+    }
+  }
+
+  // Aktualizacja UI w zależności od stanu logowania
+  async function updateAuthUI() {
+    const userInfo = await getUserInfo();
+
+    if (userInfo) {
+      userDisplay.textContent = `Logged in as: ${userInfo.userDetails}`;
+      loginGithubBtn.style.display = "none";
+      logoutBtn.style.display = "inline-block";
+    } else {
+      userDisplay.textContent = "Not logged in";
+      loginGithubBtn.style.display = "inline-block";
+      logoutBtn.style.display = "none";
+    }
+  }
+
+  // Obsługa logowania
+  loginGithubBtn.addEventListener("click", () => {
+    window.location.href = "/.auth/login/github?post_login_redirect_uri=/";
+  });
+
+  // Obsługa wylogowania
+  logoutBtn.addEventListener("click", () => {
+    window.location.href = "/.auth/logout?post_logout_redirect_uri=/";
+  });
+
+  // Wywołaj funkcję przy ładowaniu strony
+  updateAuthUI();
+
+  // --- DODATKOWO DLA FORMULARZA ROŚLIN ---
+  const addPlantForm = document.getElementById("add-plant-form"); // Załóżmy, że masz taki formularz
+  if (addPlantForm) {
+    addPlantForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const name = document.getElementById("plant-name").value;
+      const species = document.getElementById("plant-species").value;
+      const description = document.getElementById("plant-description").value;
+
+      try {
+        const response = await fetch("/api/AddPlant", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name, species, description }),
+        });
+
+        const result = await response.text(); // Oryginalnie API zwraca tekst
+        console.log(result);
+        alert(result);
+
+        // Odśwież listę roślin po dodaniu
+        await fetchPlants();
+      } catch (error) {
+        console.error("Error adding plant:", error);
+        alert("Failed to add plant.");
+      }
+    });
+  }
+  // --- KONIEC DODATKU DLA FORMULARZA ROŚLIN ---
+
+  // --- DODATKOWO DLA POBIERANIA ROŚLIN ---
+  const plantsList = document.getElementById("plants-list"); // Element do wyświetlania listy
+
+  async function fetchPlants() {
+    try {
+      const response = await fetch("/api/GetPlants");
+      const plants = await response.json(); // API zwraca JSON
+
+      if (plantsList) {
+        plantsList.innerHTML = ""; // Wyczyść listę
+        if (plants.length === 0) {
+          plantsList.innerHTML = "<li>No plants added yet.</li>";
+        } else {
+          plants.forEach((plant) => {
+            const li = document.createElement("li");
+            li.textContent = `<span class="math-inline">\{plant\.name\} \(</span>{plant.species}) - ${plant.description}`;
+            plantsList.appendChild(li);
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching plants:", error);
+      if (plantsList) {
+        plantsList.innerHTML = "<li>Error loading plants.</li>";
+      }
+    }
+  }
+
+  // Pobierz rośliny przy ładowaniu strony (po początkowym sprawdzeniu autoryzacji)
+  fetchPlants();
+  // --- KONIEC DODATKU DLA POBIERANIA ROŚLIN ---
+});
