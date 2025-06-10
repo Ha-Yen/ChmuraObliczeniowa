@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plantify</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=M+PLUS+Code+Latin:wght@100..700&display=swap");
+    </style>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <div class="frame-outer">
+        <div class="frame-top">
+          <div class="banner-left"></div>
+          <div class="banner">
+            <img class="banner-gif undraggable" src="src/plant.gif" />
+            Plantify
+            <img class="banner-gif undraggable" src="src/plant.gif" />
+          </div>
+          <a href="https://github.com/Ha-Yen/TechnologieWebowe"
+            ><img class="close undraggable" src="src/CloseButton.svg"
+          /></a>
+        </div>
+        <div class="frame-inner">
+          <section class="top">
+            <div class="dropdown">
+              <img class="undraggable" src="src/Dropdown.png" />
+              <div class="dropdown-content">
+                <a href="#">Item 1</a>
+                <a href="#">Item 2</a>
+                <a href="#">Item 3</a>
+              </div>
+            </div>
+            <h5>Moje roślinki</h5>
+            <div class="dropdown-left">
+              <img class="undraggable" src="src/More.svg" />
+              <div class="dropdown-content">
+                <a href="https://en.wikipedia.org/wiki/Monstera_deliciosa"
+                  >Wikipedia</a
+                >
+              </div>
+            </div>
+          </section>
+          <div class="image-container">
+            <img class="cover undraggable" src="src/monstera-thai.webp" />
+            <img class="blur undraggable" src="src/monstera-thai.webp" />
+          </div>
+          <section class="description">
+            <h3>Marlena</h3>
+            <h5>Monstera deliciosa</h5>
+            <!-- Cover and Description start-->
+          </section>
+          <section class="progress">
+            <div class="progress-bar">
+              <div class="progress-bar-fill"></div>
+            </div>
+            <div class="progress-text">
+              <p>Ostatnie podlanie</p>
+              <p>XX:XX:XX</p>
+            </div>
+          </section>
+          <section class="buttons">
+            <button>
+              <img class="undraggable btn" src="src/previous.png" />
+            </button>
+            <button>
+              <img class="undraggable water" src="src/water.png" />
+            </button>
+            <button><img class="undraggable btn" src="src/next.png" /></button>
+          </section>
+          <!-- Cover and Description end-->
+          <!-- Callendar start-->
+          <section class="callendar">
+            <div class="calendar">
+              <div class="calendar-header">
+                <button id="prevMonth">&lt;</button>
+                <h4 id="currentMonth"></h4>
+                <button id="nextMonth">&gt;</button>
+              </div>
+              <div class="calendar-body">
+                <div class="weekdays">
+                  <div>Sun</div>
+                  <div>Mon</div>
+                  <div>Tue</div>
+                  <div>Wed</div>
+                  <div>Thu</div>
+                  <div>Fri</div>
+                  <div>Sat</div>
+                </div>
+                <div class="days" id="calendarDays"></div>
+              </div>
+            </div>
+          </section>
+          <!-- Callendar end-->
+        </div>
+      </div>
+      <div class="background"></div>
+    </main>
+  </body>
+</html>
