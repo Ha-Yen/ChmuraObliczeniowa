@@ -3,41 +3,8 @@ const { TableClient, AzureNamedKeyCredential } = require("@azure/data-tables");
 module.exports = async function (context, req) {
   context.log("GetPlants HTTP trigger function processed a request.");
 
-  // 1. Zabezpieczenia: Pobierz informacje o użytkowniku zalogowanym przez Static Web Apps
-  const clientPrincipal = req.headers["x-ms-client-principal"];
-  let userId = "anonymous"; // Domyślna wartość dla niezalogowanych lub testów
-  let filter = "";
-
-  if (clientPrincipal) {
-    try {
-      const decodedClientPrincipal = Buffer.from(
-        clientPrincipal,
-        "base64"
-      ).toString("ascii");
-      const principal = JSON.parse(decodedClientPrincipal);
-      userId = principal.userId || principal.nameId || principal.userDetails;
-      context.log(`Logged in user ID: ${userId}`);
-      // Filtruj po PartitionKey dla zalogowanego użytkownika
-      filter = `PartitionKey eq '${userId}'`;
-    } catch (error) {
-      context.log.error("Error decoding client principal:", error);
-    }
-  } else {
-    context.log(
-      "No client principal found. User is anonymous or not authenticated by SWA."
-    );
-    // Jeśli użytkownik jest anonimowy, możesz zwrócić puste dane lub błąd
-    // Dla ułatwienia debugowania, możemy pozwolić na pobieranie "anonimowych" danych,
-    // ale w rzeczywistej aplikacji raczej zwrócilibyśmy błąd 401 Unauthorized.
-    // Obecnie filter pozostaje pusty, co pobierze wszystkie dane,
-    // jeśli nie ma PartitionKey 'anonymous'.
-    // Możesz zmienić to na:
-    // context.res = { status: 401, body: "Unauthorized: Please log in." };
-    // return;
-    filter = `PartitionKey eq 'anonymous'`; // Lub jakąkolś inną strategię dla anonimowych
-  }
-
-  const tableName = "plants";
+  const githubUserPartitionKey = "Ha-Yen"; // Użyj tego samego PartitionKey co w PopulatePlants
+  const tableName = "plants"; // Zmień na dużą literę 'P', aby pasowało do "PopulatePlants"
   const connectionString = process.env["ConnectionKey"];
 
   if (!connectionString) {
@@ -48,28 +15,53 @@ module.exports = async function (context, req) {
     return;
   }
 
+  // 1. Zabezpieczenia: Pobierz informacje o użytkowniku zalogowanym przez Static Web Apps
+  let filter = "";
+  const clientPrincipal = req.headers["x-ms-client-principal"];
+
+  if (clientPrincipal) {
+    try {
+      const decodedClientPrincipal = Buffer.from(
+        clientPrincipal,
+        "base64"
+      ).toString("ascii");
+      const principal = JSON.parse(decodedClientPrincipal);
+      const userId =
+        principal.userId || principal.nameId || principal.userDetails; // Użyj userId z SWA
+      context.log(`Logged in user ID: ${userId}`);
+      filter = `PartitionKey eq '${userId}'`; // Filtruj po zalogowanym user ID
+    } catch (error) {
+      context.log.error("Error decoding client principal:", error);
+      // Fallback, jeśli dekodowanie się nie powiedzie, ale jest clientPrincipal
+      filter = `PartitionKey eq '${githubUserPartitionKey}'`; // Domyślny dla testów
+    }
+  } else {
+    context.log("No client principal found. Fetching default plants.");
+    // Jeśli użytkownik jest anonimowy, nadal chcemy pobrać "Twoje" testowe rośliny
+    filter = `PartitionKey eq '${githubUserPartitionKey}'`;
+  }
+
   try {
     const tableClient = TableClient.fromConnectionString(
       connectionString,
       tableName
     );
 
-    // Sprawdź, czy tabela istnieje, jeśli nie, zwróć pustą listę
-    const { status } = await tableClient.getTableAccessPolicy();
-    if (status === 404) {
-      // Table not found
-      context.res = {
-        status: 200,
-        body: [], // Zwróć pustą listę, jeśli tabela nie istnieje
-      };
-      return;
-    }
+    // --- Zmieniona sekcja sprawdzania istnienia tabeli i odczytu ---
+    // Możesz pominąć jawne sprawdzanie istnienia tabeli przed zapytaniem,
+    // ponieważ zapytanie na nieistniejącej tabeli zwykle samo zgłosi błąd 404,
+    // który zostanie złapany i obsłużony.
+    // Usunięta linia: const { status } = await tableClient.getTableAccessPolicy();
 
     const plants = [];
-    // Użyj filter (jeśli istnieje) do pobierania tylko roślin dla danego użytkownika
+    // Użyj filter do pobierania tylko roślin dla danego użytkownika
+    // Jeśli zapytanie do nieistniejącej tabeli rzuci błąd, zostanie to złapane.
     for await (const entity of tableClient.listEntities({
       queryOptions: { filter: filter },
     })) {
+      // Konwertuj datę z powrotem na format, który może być użyteczny na frontendzie
+      // (choć JS Date string powinien być w porządku)
+      // Możesz dodać inne konwersje, jeśli potrzebne
       plants.push(entity);
     }
 
@@ -79,10 +71,10 @@ module.exports = async function (context, req) {
     };
   } catch (error) {
     context.log.error("Error getting plants:", error);
-    // Specyficzne sprawdzenie dla 404, jeśli tabela nie istnieje
+    // Sprawdź, czy błąd wynika z nieistniejącej tabeli (statusCode 404)
     if (error.statusCode === 404) {
       context.res = {
-        status: 200,
+        status: 200, // Nadal zwracamy 200 OK, ale z pustą tablicą
         body: [], // Zwróć pustą listę, jeśli tabela nie istnieje
       };
     } else {
