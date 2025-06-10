@@ -33,9 +33,7 @@ const addPlantLink = document.getElementById("add-plant-link"); // "Plusik" do d
 const plantFormContainer = document.getElementById("plant-form-container"); // Kontener formularza dodawania
 const plantsListUI = document.getElementById("plants-list"); // Lista roślin wyświetlana w dropdownie UI
 const addPlantForm = document.getElementById("add-plant-form"); // Sam formularz
-const wikipediaLink = document.querySelector(
-  ".dropdown-left .dropdown-content a"
-); // Wikipedia link
+const wikipediaLink = document.getElementById("wikipedia-link"); // ZMIENIONE: Poprawny selektor dla linku Wikipedia
 
 // === Elementy UI dla Logowania ===
 const loginGithubBtn = document.getElementById("login-github");
@@ -233,15 +231,15 @@ async function fetchPlants() {
 
     if (plants.length === 0) {
       addPlantLink.textContent = "+ Add New Plant";
-      addPlantLink.style.display = "block";
-      plantsListUI.style.display = "none"; // Ukryj ul
-      plantFormContainer.style.display = "none";
+      addPlantLink.style.display = "block"; // Pokaż link dodawania roślin
+      plantsListUI.style.display = "none"; // Ukryj ul (bo pusta)
+      plantFormContainer.style.display = "none"; // Upewnij się, że formularz jest ukryty
       currentPlantIndex = 0; // Reset index
       updatePlantDisplay(null); // Wyświetl stan "brak roślin"
     } else {
       addPlantLink.textContent = "+ Add New Plant";
-      addPlantLink.style.display = "block";
-      plantsListUI.style.display = "block"; // Pokaż ul
+      addPlantLink.style.display = "block"; // Pokaż link dodawania roślin
+      plantsListUI.style.display = "block"; // Pokaż ul (bo są rośliny)
 
       // Posortuj rośliny alfabetycznie po nazwie
       plants.sort((a, b) => a.name.localeCompare(b.name));
@@ -281,19 +279,12 @@ waterButton.addEventListener("click", async () => {
     plantToUpdate.lastWateringDate = new Date().toISOString();
 
     try {
-      // WYWOŁANIE API DO AKTUALIZACJI ROŚLINY (JEŚLI BĘDZIESZ MIAŁ TAKĄ FUNKCJĘ)
-      // Na razie, ponieważ Azure Table Storage nie ma prostego "update by rowKey" dla wszystkich pól,
-      // musielibyśmy napisać funkcję API do tego.
-      // Jeśli chcesz to zrobić, musisz dodać nową funkcję API np. "UpdatePlant".
-      // Póki co, zmienimy tylko lokalnie, a po odświeżeniu strony wróci do poprzedniego stanu
-      // chyba, że faktycznie dodasz funkcję aktualizacji.
-      // Dla uproszczenia na razie po prostu odświeżymy wyświetlanie.
-
-      // Tymczasowo, jeśli chcesz, aby to było trwałe, potrzebujesz funkcji API:
+      // WAŻNE: Aby zmiana daty podlewania była trwała, musisz zaimplementować funkcję API (np. "/api/UpdatePlant")
+      // która zaktualizuje rekord w Azure Table Storage. Bez tego, po odświeżeniu strony, data wróci do poprzedniego stanu.
       // const response = await fetch('/api/UpdatePlant', {
       //     method: 'POST',
       //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify(plantToUpdate)
+      //     body: JSON.stringify(plantToUpdate) // Upewnij się, że Twój API akceptuje obiekt Plant
       // });
       // if (!response.ok) throw new Error('Failed to update plant');
 
@@ -330,11 +321,16 @@ mainDropdownImage.addEventListener("click", () => {
 
 // Zamknij dropdown, jeśli kliknięto poza nim
 window.addEventListener("click", (event) => {
+  // Sprawdzamy, czy kliknięto poza obrazkiem dropdowna i poza jego zawartością
   if (
     !event.target.matches(".dropdown img.undraggable") &&
-    !event.target.closest(".dropdown-content")
+    !event.target.closest("#plants-dropdown-content") // Używamy ID, aby być bardziej precyzyjnym
   ) {
     plantsDropdownContent.style.display = "none";
+    plantFormContainer.style.display = "none"; // Upewnij się, że formularz również jest ukrywany
+    if (plants.length > 0) {
+      plantsListUI.style.display = "block"; // Jeśli są rośliny, przywróć listę
+    }
   }
 });
 
@@ -346,14 +342,12 @@ if (addPlantForm) {
     const species = document.getElementById("plant-species").value;
     const description = document.getElementById("plant-description").value;
 
-    // Tutaj dodajemy Wikipedia URL i Cover Image SRC
-    // Możesz pozwolić użytkownikowi na wpisanie tego, lub ustawić domyślne.
-    // Na potrzeby demo, dodajmy domyślne/puste wartości.
+    // Pobieramy wartości z nowych pól, jeśli istnieją w HTML
     const wikipediaUrl =
-      document.getElementById("plant-wikipedia-url")?.value || ""; // Dodaj to pole do HTML jeśli chcesz by user podawał
+      document.getElementById("plant-wikipedia-url")?.value || "";
     const coverImageSrc =
       document.getElementById("plant-cover-image")?.value ||
-      "src/default_plant.webp"; // Dodaj to pole do HTML jeśli chcesz by user podawał
+      "src/default_plant.webp";
 
     try {
       const response = await fetch("/api/AddPlant", {
@@ -363,8 +357,8 @@ if (addPlantForm) {
           name,
           species,
           description,
-          wikipediaUrl, // Dodaj do wysyłanych danych
-          coverImageSrc, // Dodaj do wysyłanych danych
+          wikipediaUrl,
+          coverImageSrc,
         }),
       });
 
@@ -390,31 +384,31 @@ addPlantLink.addEventListener("click", (e) => {
   // Przełącz widoczność formularza
   plantFormContainer.style.display =
     plantFormContainer.style.display === "none" ? "block" : "none";
-  // Ukryj listę roślin, gdy formularz jest otwarty (opcjonalnie)
+  // Ukryj listę roślin, gdy formularz jest otwarty
   if (plantFormContainer.style.display === "block") {
     plantsListUI.style.display = "none";
   } else {
     // Jeśli zamykamy formularz, przywróć widoczność listy, jeśli są rośliny
     if (plants.length > 0) {
       plantsListUI.style.display = "block";
+    } else {
+      plantsListUI.style.display = "none"; // Jeśli nie ma roślin, nie pokazuj pustej listy
     }
   }
 });
 
 // === Inicjalizacja Aplikacji ===
 document.addEventListener("DOMContentLoaded", async () => {
-  // Usuń wywołania związane z Local Storage
-  // plants = getSavedPlants();
-  // currentPlantIndex = getSavedCurrentPlantIndex();
-
   updateAuthUI(); // Rozpoczynamy od sprawdzenia autoryzacji
-
-  // Ponieważ fetchPlants jest wywoływane w updateAuthUI,
-  // reszta logiki inicjalizacji roślin zostanie wykonana tam.
 
   // Event listeners dla kalendarza
   prevMonthButton.addEventListener("click", goToPreviousMonth);
   nextMonthButton.addEventListener("click", goToNextMonth);
+
+  // Obsługa wylogowania (zmieniona lokalizacja dla jasności)
+  logoutBtn.addEventListener("click", () => {
+    window.location.href = "/.auth/logout?post_logout_redirect_uri=/";
+  });
 });
 
 // === Dodatkowe zabezpieczenie przed błędami obrazków (opcjonalne) ===
