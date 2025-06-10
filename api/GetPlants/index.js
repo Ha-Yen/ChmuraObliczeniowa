@@ -38,12 +38,12 @@ module.exports = async function (context, req) {
   }
 
   const tableName = "plants";
-  const connectionString = process.env.AzureWebJobsStorage;
+  const connectionString = process.env["ConnectionKey"];
 
   if (!connectionString) {
     context.res = {
       status: 500,
-      body: "AzureWebJobsStorage connection string is not configured.",
+      body: "ConnectionKey connection string is not configured.",
     };
     return;
   }
