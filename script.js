@@ -14,54 +14,35 @@ const progressBarFill = document.querySelector(".progress-bar-fill");
 const plantNameElement = document.querySelector(".description h3");
 const plantSpeciesElement = document.querySelector(".description h5");
 const plantCoverImage = document.querySelector(".image-container .cover");
-const plantBlurImage = (document = document.querySelector(
-  ".image-container .blur"
-));
+const plantBlurImage = document.querySelector(".image-container .blur");
 const previousPlantButton = document.querySelector(
   ".buttons button:nth-child(1)"
 );
 const nextPlantButton = document.querySelector(".buttons button:nth-child(3)");
 
 // === Elementy UI dla Dropdownu i Formularza Roślin ===
-const mainDropdownImage = document.querySelector(".dropdown img.undraggable");
+const mainDropdownImage = document.querySelector(".dropdown img.undraggable"); // Obrazek, który otwiera dropdown "Moje roślinki"
 const plantsDropdownContent = document.getElementById(
   "plants-dropdown-content"
-);
-const addPlantLink = document.getElementById("add-plant-link");
-const plantFormContainer = document.getElementById("plant-form-container");
-const plantsListUI = document.getElementById("plants-list");
-const addPlantForm = document.getElementById("add-plant-form");
+); // Kontener zawartości dropdowna roślin
+const addPlantLink = document.getElementById("add-plant-link"); // Link "+ Add New Plant"
+const plantFormContainer = document.getElementById("plant-form-container"); // Kontener formularza dodawania roślin
+const plantsListUI = document.getElementById("plants-list"); // Lista roślin wyświetlana w dropdownie UI
+const addPlantForm = document.getElementById("add-plant-form"); // Sam formularz dodawania rośliny
 
 // === Elementy UI dla Logowania i Linku Wikipedia ===
-const wikipediaLink = document.getElementById("wikipedia-link");
+const wikipediaLink = document.getElementById("wikipedia-link"); // Poprawny selektor dla linku Wikipedia (wymaga ID w HTML)
 const loginGithubBtn = document.getElementById("login-github");
 const logoutBtn = document.getElementById("logout");
 const userDisplay = document.getElementById("user-display");
 
-// NOWE SELEKTORY DLA ZMIANY DATY PODLEWANIA
-const wateringDateInput = document.getElementById("watering-date-input");
-const saveWateringDateBtn = document.getElementById("save-watering-date-btn");
-
-// NOWE SELEKTORY DLA PÓL FORMULARZA DODAWANIA ROŚLIN (aby uniknąć kolizji ID)
-const addPlantNameInput = document.getElementById("add-plant-name");
-const addPlantSpeciesInput = document.getElementById("add-plant-species");
-const addPlantDescriptionInput = document.getElementById(
-  "add-plant-description"
-);
-const addPlantWikipediaUrlInput = document.getElementById(
-  "add-plant-wikipedia-url"
-);
-const addPlantCoverImageInput = document.getElementById(
-  "add-plant-cover-image"
-);
-
 // === Zmienne Stanu Globalnego ===
 let currentDate = new Date();
-let plants = [];
+let plants = []; // Globalna tablica roślin pobrana z API
 let currentPlantIndex = 0;
 let timerInterval;
-let lastWateringDate = null;
-let currentUser = null;
+let lastWateringDate = null; // Data ostatniego podlewania dla aktualnie wyświetlanej rośliny
+let currentUser = null; // Informacje o zalogowanym użytkowniku
 
 // --- Funkcje Pomocnicze ---
 
@@ -79,37 +60,29 @@ function updatePlantDisplay(plant) {
     plantSpeciesElement.textContent = "Add a plant!";
     lastWateredTimeText.textContent = "N/A";
     progressBarFill.style.width = "0%";
-    plantCoverImage.src = "src/default_plant.webp";
+    plantCoverImage.src = "src/default_plant.webp"; // Domyślny obrazek
     plantBlurImage.src = "src/default_plant.webp";
     wikipediaLink.href = "#";
-    wikipediaLink.target = "_self";
-    wateringDateInput.value = ""; // Clear date input
+    wikipediaLink.target = "_self"; // Reset target
     renderCalendar();
     return;
   }
 
   plantNameElement.textContent = plant.name;
   plantSpeciesElement.textContent = plant.species;
-  plantCoverImage.src = plant.coverImageSrc || "src/default_plant.webp";
+  plantCoverImage.src = plant.coverImageSrc || "src/default_plant.webp"; // Domyślny, jeśli brak
   plantBlurImage.src = plant.coverImageSrc || "src/default_plant.webp";
   wikipediaLink.href = plant.wikipediaUrl || "#";
-  wikipediaLink.target = plant.wikipediaUrl ? "_blank" : "_self";
+  wikipediaLink.target = plant.wikipediaUrl ? "_blank" : "_self"; // Otwórz w nowej karcie tylko jeśli jest URL
 
   if (plant.lastWateringDate) {
     lastWateringDate = new Date(plant.lastWateringDate);
-    // Set date input value to last watered date
-    const yyyy = lastWateringDate.getFullYear();
-    const mm = String(lastWateringDate.getMonth() + 1).padStart(2, "0"); // Months start at 0!
-    const dd = String(lastWateringDate.getDate()).padStart(2, "0");
-    wateringDateInput.value = `${yyyy}-${mm}-${dd}`;
-
     updateLastWateredDisplay();
     updateProgressBar();
     clearInterval(timerInterval);
     timerInterval = setInterval(updateElapsedTime, 1000);
   } else {
     lastWateringDate = null;
-    wateringDateInput.value = ""; // Clear date input
     updateLastWateredDisplay();
     updateProgressBar();
     clearInterval(timerInterval);
@@ -121,6 +94,7 @@ function updatePlantDisplay(plant) {
 
 function updateLastWateredDisplay() {
   lastWateredText.textContent = "Ostatnie podlanie";
+  // Czas będzie aktualizowany przez timerInterval
 }
 
 function updateProgressBar() {
@@ -229,18 +203,18 @@ async function updateAuthUI() {
     userDisplay.textContent = `Logged in as: ${currentUser.userDetails}`;
     loginGithubBtn.style.display = "none";
     logoutBtn.style.display = "inline-block";
-    mainDropdownImage.style.display = "block"; // Show dropdown icon after login
-    await fetchPlants(); // Fetch plants after login
+    mainDropdownImage.style.display = "block"; // Pokaż ikonę dropdownu po zalogowaniu
+    await fetchPlants(); // Pobierz rośliny po zalogowaniu
   } else {
     userDisplay.textContent = "Not logged in";
     loginGithubBtn.style.display = "inline-block";
     logoutBtn.style.display = "none";
-    mainDropdownImage.style.display = "none"; // Hide dropdown icon if not logged in
-    plantsDropdownContent.style.display = "none"; // Hide dropdown content
+    mainDropdownImage.style.display = "none"; // Ukryj ikonę dropdownu, jeśli niezalogowany
+    plantsDropdownContent.style.display = "none"; // Ukryj zawartość dropdownu
     plantsListUI.innerHTML = "<li>Please log in to see your plants.</li>";
-    addPlantLink.style.display = "none"; // Hide "+ Add New Plant" link
-    plantFormContainer.style.display = "none"; // Hide add form
-    updatePlantDisplay(null); // Reset plant display
+    addPlantLink.style.display = "none"; // Ukryj link "+ Add New Plant"
+    plantFormContainer.style.display = "none"; // Ukryj formularz dodawania
+    updatePlantDisplay(null); // Resetuj wyświetlanie rośliny
   }
 }
 
@@ -257,38 +231,38 @@ async function fetchPlants() {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    plants = await response.json(); // Update global 'plants' array
+    plants = await response.json(); // Aktualizuj globalną tablicę 'plants'
 
-    plantsListUI.innerHTML = ""; // Clear UI list
+    plantsListUI.innerHTML = ""; // Wyczyść listę UI
 
     if (plants.length === 0) {
       addPlantLink.textContent = "+ Add New Plant";
-      addPlantLink.style.display = "block"; // Show add plant link
-      plantsListUI.style.display = "none"; // Hide ul (because it's empty)
-      plantFormContainer.style.display = "none"; // Ensure form is hidden
+      addPlantLink.style.display = "block"; // Pokaż link dodawania roślin
+      plantsListUI.style.display = "none"; // Ukryj ul (bo pusta)
+      plantFormContainer.style.display = "none"; // Upewnij się, że formularz jest ukryty
       currentPlantIndex = 0; // Reset index
-      updatePlantDisplay(null); // Display "no plants" state
+      updatePlantDisplay(null); // Wyświetl stan "brak roślin"
     } else {
       addPlantLink.textContent = "+ Add New Plant";
-      addPlantLink.style.display = "block"; // Show add plant link
-      plantsListUI.style.display = "block"; // Show ul (because there are plants)
+      addPlantLink.style.display = "block"; // Pokaż link dodawania roślin
+      plantsListUI.style.display = "block"; // Pokaż ul (bo są rośliny)
 
-      // Sort plants alphabetically by name
+      // Posortuj rośliny alfabetycznie po nazwie
       plants.sort((a, b) => a.name.localeCompare(b.name));
 
       plants.forEach((plant, index) => {
         const li = document.createElement("li");
-        li.textContent = plant.name; // Display only plant name
-
+        li.textContent = `${plant.name} (${plant.species})`;
         li.addEventListener("click", () => {
-          currentPlantIndex = index; // Update index
-          updatePlantDisplay(plants[currentPlantIndex]); // Display clicked plant
-          plantsDropdownContent.style.display = "none"; // Close dropdown
-          plantFormContainer.style.display = "none"; // Hide form
+          currentPlantIndex = index;
+          updatePlantDisplay(plants[currentPlantIndex]);
+          plantsDropdownContent.style.display = "none"; // Zamknij dropdown po wyborze
+          plantFormContainer.style.display = "none"; // Ukryj formularz po wyborze
+          plantsListUI.style.display = "block"; // Pokaż listę po wyborze rośliny i zamknięciu formularza
         });
         plantsListUI.appendChild(li);
       });
-      // Set the currently displayed plant based on (e.g., first or remembered)
+      // Ustaw aktualnie wyświetlaną roślinę na podstawie (np. pierwszej lub zapamiętanej)
       if (currentPlantIndex >= plants.length) {
         currentPlantIndex = 0;
       }
@@ -303,84 +277,39 @@ async function fetchPlants() {
   }
 }
 
-// NEW FUNCTION: Updates the watering date in the database
-async function updatePlantWateringDateInDb(plant, newDateISOString) {
-  if (!plant || !plant.PartitionKey || !plant.RowKey) {
-    console.error(
-      "Invalid plant object or missing PartitionKey/RowKey for update."
-    );
-    alert("Cannot update plant: missing identifier.");
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/UpdatePlant", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        PartitionKey: plant.PartitionKey,
-        RowKey: plant.RowKey,
-        lastWateringDate: newDateISOString,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(
-        `HTTP error! status: ${response.status}. Details: ${errorText}`
-      );
-    }
-
-    const result = await response.text();
-    console.log("Update response:", result);
-    alert("Watering date updated successfully!"); // SUCCESS ALERT ADDED HERE
-
-    // After successful database update, update the object locally
-    plant.lastWateringDate = newDateISOString;
-    updatePlantDisplay(plant); // Refresh UI
-    await fetchPlants(); // Refresh the entire list to ensure data consistency
-  } catch (error) {
-    console.error("Error updating plant watering date:", error);
-    alert(`Failed to update watering date: ${error.message}`);
-  }
-}
-
 // === Event Listeners ===
 
-// Handle "Water" button (sets date to NOW)
+// Obsługa przycisku "Podlej"
 waterButton.addEventListener("click", async () => {
   if (plants.length > 0 && plants[currentPlantIndex]) {
     const plantToUpdate = plants[currentPlantIndex];
-    const newDate = new Date().toISOString();
-    await updatePlantWateringDateInDb(plantToUpdate, newDate);
+    plantToUpdate.lastWateringDate = new Date().toISOString(); // Aktualizuj datę lokalnie
+
+    // WAŻNE: Aby zmiana daty podlewania była trwała, musisz zaimplementować funkcję API (np. "/api/UpdatePlant")
+    // która zaktualizuje rekord w Azure Table Storage. Bez tego, po odświeżeniu strony, data wróci do poprzedniego stanu.
+    // Pamiętaj, że w Azure Table Storage, do aktualizacji potrzebujesz PartitionKey i RowKey.
+    // Musisz zmodyfikować swoją funkcję API "AddPlant" aby zapisywała te klucze, lub dodać nową funkcję "UpdatePlant"
+    // która je przyjmuje.
+    //
+    // Przykład (zakładając, że Twoja roślina ma właściwości PartitionKey i RowKey):
+    // try {
+    //     const response = await fetch('/api/UpdatePlant', { // Musisz stworzyć taką funkcję API
+    //         method: 'POST', // lub 'PUT'
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify(plantToUpdate)
+    //     });
+    //     if (!response.ok) throw new Error('Failed to update plant');
+    //     console.log('Plant watering date updated successfully in DB.');
+    // } catch (error) {
+    //     console.error('Error updating plant watering date in DB:', error);
+    //     alert('Failed to update watering date permanently.');
+    // }
+
+    updatePlantDisplay(plantToUpdate); // Aktualizuj UI natychmiast
   }
 });
 
-// Handle "Save Date" button (from date input)
-saveWateringDateBtn.addEventListener("click", async () => {
-  if (plants.length === 0 || !plants[currentPlantIndex]) {
-    alert("Please select a plant first.");
-    return;
-  }
-
-  const newDateValue = wateringDateInput.value; // Format 'YYYY-MM-DD'
-  if (!newDateValue) {
-    alert("Please select a date.");
-    return;
-  }
-
-  // Convert 'YYYY-MM-DD' to ISO string (UTC)
-  const newDate = new Date(newDateValue);
-  // To avoid timezone issues, set time to 00:00 UTC
-  // or to 12:00 (noon) to not revert to previous day in some zones.
-  newDate.setHours(12, 0, 0, 0); // Set to noon to minimize timezone errors
-  const newDateISOString = newDate.toISOString();
-
-  const plantToUpdate = plants[currentPlantIndex];
-  await updatePlantWateringDateInDb(plantToUpdate, newDateISOString);
-});
-
-// Switch plants
+// Przełączanie roślin
 previousPlantButton.addEventListener("click", () => {
   if (plants.length > 0) {
     currentPlantIndex = (currentPlantIndex - 1 + plants.length) % plants.length;
@@ -395,49 +324,52 @@ nextPlantButton.addEventListener("click", () => {
   }
 });
 
-// Calendar
+// Kalendarz
 prevMonthButton.addEventListener("click", goToPreviousMonth);
 nextMonthButton.addEventListener("click", goToNextMonth);
 
-// === Handle main dropdown "My Plants" ===
+// === Obsługa Dropdownu głównego "Moje roślinki" ===
 mainDropdownImage.addEventListener("click", () => {
+  // Przełącz widoczność zawartości dropdowna
   plantsDropdownContent.style.display =
     plantsDropdownContent.style.display === "block" ? "none" : "block";
 
+  // Zawsze ukryj formularz i upewnij się, że lista jest widoczna (jeśli są rośliny) po otwarciu/zamknięciu głównego dropdowna
   plantFormContainer.style.display = "none";
   if (plants.length > 0 && plantsDropdownContent.style.display === "block") {
     plantsListUI.style.display = "block";
   } else {
-    plantsListUI.style.display = "none";
+    plantsListUI.style.display = "none"; // Jeśli brak roślin lub dropdown zamknięty
   }
 });
 
-// Close dropdown and form if clicked outside
+// Zamknij dropdown i formularz, jeśli kliknięto poza nimi
 window.addEventListener("click", (event) => {
   if (
-    !event.target.matches(".dropdown img.undraggable") &&
-    !event.target.closest("#plants-dropdown-content") &&
-    !event.target.closest(".dropdown-left .dropdown-content")
+    !event.target.matches(".dropdown img.undraggable") && // Czy to nie obrazek dropdowna
+    !event.target.closest("#plants-dropdown-content") && // Czy to nie wewnątrz dropdowna roślin
+    !event.target.closest(".dropdown-left .dropdown-content") // Czy to nie wewnątrz dropdowna Wiki
   ) {
     plantsDropdownContent.style.display = "none";
-    plantFormContainer.style.display = "none";
+    plantFormContainer.style.display = "none"; // Ukryj formularz
     if (plants.length > 0) {
-      plantsListUI.style.display = "block";
+      plantsListUI.style.display = "block"; // Przywróć listę, jeśli istnieją rośliny
     }
   }
 });
 
-// === Handle adding plants from the form ===
+// === Obsługa dodawania roślin z formularza ===
 if (addPlantForm) {
   addPlantForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    // Use new, unique selectors for form fields
-    const name = addPlantNameInput.value;
-    const species = addPlantSpeciesInput.value;
-    const description = addPlantDescriptionInput.value;
-    const wikipediaUrl = addPlantWikipediaUrlInput?.value || "";
+    const name = document.getElementById("plant-name").value;
+    const species = document.getElementById("plant-species").value;
+    const description = document.getElementById("plant-description").value;
+    const wikipediaUrl =
+      document.getElementById("plant-wikipedia-url")?.value || "";
     const coverImageSrc =
-      addPlantCoverImageInput?.value || "src/default_plant.webp";
+      document.getElementById("plant-cover-image")?.value ||
+      "src/default_plant.webp";
 
     try {
       const response = await fetch("/api/AddPlant", {
@@ -456,10 +388,10 @@ if (addPlantForm) {
       console.log(result);
       alert(result);
 
-      addPlantForm.reset();
-      plantFormContainer.style.display = "none";
-      await fetchPlants();
-      plantsDropdownContent.style.display = "none";
+      addPlantForm.reset(); // Wyczyść formularz
+      plantFormContainer.style.display = "none"; // Ukryj formularz po dodaniu
+      await fetchPlants(); // Odśwież listę roślin i wyświetl nowo dodaną
+      plantsDropdownContent.style.display = "none"; // Zamknij dropdown
     } catch (error) {
       console.error("Error adding plant:", error);
       alert("Failed to add plant.");
@@ -467,37 +399,42 @@ if (addPlantForm) {
   });
 }
 
-// === Handle clicking "+ Add New Plant" ===
+// === Obsługa kliknięcia "+ Add New Plant" ===
 addPlantLink.addEventListener("click", (e) => {
   e.preventDefault();
+  // Przełącz widoczność formularza
   plantFormContainer.style.display =
     plantFormContainer.style.display === "none" ? "block" : "none";
+  // Ukryj listę roślin, gdy formularz jest otwarty
   if (plantFormContainer.style.display === "block") {
     plantsListUI.style.display = "none";
   } else {
+    // Jeśli zamykamy formularz, przywróć widoczność listy, jeśli są rośliny
     if (plants.length > 0) {
       plantsListUI.style.display = "block";
     } else {
-      plantsListUI.style.display = "none";
+      plantsListUI.style.display = "none"; // Jeśli brak roślin, nie pokazuj pustej listy
     }
   }
 });
 
-// === Initialize Application ===
+// === Inicjalizacja Aplikacji ===
 document.addEventListener("DOMContentLoaded", async () => {
+  // Obsługa logowania
   loginGithubBtn.addEventListener("click", () => {
     window.location.href = "/.auth/login/github?post_login_redirect_uri=/";
   });
 
+  // Obsługa wylogowania
   logoutBtn.addEventListener("click", () => {
     window.location.href = "/.auth/logout?post_logout_redirect_uri=/";
   });
 
-  updateAuthUI();
+  updateAuthUI(); // Rozpoczynamy od sprawdzenia autoryzacji
 });
 
-// === Additional image error handling (optional) ===
+// === Dodatkowe zabezpieczenie przed błędami obrazków (opcjonalne) ===
 plantCoverImage.onerror = function () {
-  this.src = "src/default_plant.webp";
+  this.src = "src/default_plant.webp"; // Domyślny obrazek w razie błędu
   plantBlurImage.src = "src/default_plant.webp";
 };
