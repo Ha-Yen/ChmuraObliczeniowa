@@ -4,7 +4,7 @@ module.exports = async function (context, req) {
   context.log("GetPlants HTTP trigger function processed a request.");
 
   const githubUserPartitionKey = "Ha-Yen"; // Potwierdzony PartitionKey, którego używasz
-  const tableName = "plants"; // ***POTWIERDZONO: Zostało "plants" (mała litera 'p')***
+  const tableName = "plants"; // Zostaje "plants"
   const connectionString = process.env["ConnectionKey"];
 
   if (!connectionString) {
@@ -15,11 +15,16 @@ module.exports = async function (context, req) {
     return;
   }
 
-  let targetPartitionKey = githubUserPartitionKey; // Domyślnie użyjemy "Ha-Yen"
+  // >>> TYMCZASOWA ZMIANA TYLKO DLA CELÓW DEBUGOWANIA <<<
+  // Ta linia wymusza, aby targetPartitionKey ZAWSZE był "Ha-Yen"
+  let targetPartitionKey = githubUserPartitionKey;
 
-  // 1. Zabezpieczenia: Pobierz informacje o użytkowniku zalogowanym przez Static Web Apps
+  // Poniższy blok kodu, który dekoduje clientPrincipal i potencjalnie zmienia
+  // targetPartitionKey na userId, jest teraz nieistotny, ponieważ
+  // targetPartitionKey już zostało ustawione na "Ha-Yen".
+  // Możesz go nawet zakomentować na czas testów, aby było to bardziej oczywiste:
+  /*
   const clientPrincipal = req.headers["x-ms-client-principal"];
-
   if (clientPrincipal) {
     try {
       const decodedClientPrincipal = Buffer.from(
@@ -30,24 +35,19 @@ module.exports = async function (context, req) {
       const userId =
         principal.userId || principal.nameId || principal.userDetails;
       context.log(`Logged in user ID: ${userId}`);
-      // Jeśli użytkownik jest zalogowany i ma inny userId niż "Ha-Yen", użyj jego userId
-      // W docelowej aplikacji najlepiej, żeby użytkownik miał swój własny PartitionKey
-      // Na razie, dla testów, możemy pozostać przy Ha-Yen, jeśli użytkownik nie ma swoich danych.
-      targetPartitionKey = userId; // Użyj zalogowanego userId
+      // targetPartitionKey = userId; // Ta linia jest teraz ignorowana
     } catch (error) {
       context.log.error("Error decoding client principal:", error);
-      // W przypadku błędu dekodowania, wracamy do domyślnego
-      targetPartitionKey = githubUserPartitionKey;
     }
   } else {
     context.log(
       "No client principal found. Fetching plants for default PartitionKey (Ha-Yen)."
     );
-    // Jeśli użytkownik jest anonimowy, nadal chcemy pobrać Twoje testowe rośliny
-    targetPartitionKey = githubUserPartitionKey;
   }
+  */
+  // >>> KONIEC TYMCZASOWEJ ZMIANY <<<
 
-  // Budowanie filtra na podstawie wybranego PartitionKey
+  // Budowanie filtra na podstawie wybranego PartitionKey (który teraz zawsze będzie "Ha-Yen")
   const filter = `PartitionKey eq '${targetPartitionKey}'`;
 
   try {
@@ -57,40 +57,30 @@ module.exports = async function (context, req) {
     );
 
     const plants = [];
-    // Użyj listEntities z filtrem. Ta metoda jest odporna na brak wyników.
-    // Jeśli tabela nie istnieje, rzuci błąd 404, który zostanie złapany.
     for await (const entity of tableClient.listEntities({
       queryOptions: { filter: filter },
     })) {
-      // Azure Table Storage zwraca encje z PartitionKey i RowKey.
-      // Jeśli chcesz pominąć te pola w odpowiedzi do frontendu, możesz zrobić mapowanie
-      // Przykład mapowania do czystszego obiektu (opcjonalnie, ale dobre dla frontendu):
       plants.push({
         name: entity.name,
         species: entity.species,
         lastWateringDate: entity.lastWateringDate,
         coverImageSrc: entity.coverImageSrc,
         wikipediaUrl: entity.wikipediaUrl,
-        // Możesz dodać inne pola, jeśli są w encji i chcesz je mieć na frontendzie
-        // np. id: entity.RowKey, jeśli Twój frontend tego wymaga.
       });
     }
 
     context.res = {
       status: 200,
-      body: plants, // Zwróć tablicę roślin
+      body: plants,
     };
   } catch (error) {
     context.log.error("Error getting plants:", error);
-
-    // Nadal ważne, aby sprawdzać status błędu i odpowiednio odpowiadać
     if (error.statusCode === 404) {
       context.res = {
-        status: 200, // Zwróć 200 OK, nawet jeśli tabela nie istnieje
-        body: [], // Ale z pustą tablicą
+        status: 200,
+        body: [],
       };
     } else {
-      // Dla wszystkich innych błędów, nadal zwracamy 500, ale z konkretnym komunikatem
       context.res = {
         status: 500,
         body: `Error getting plants: ${error.message}. Please check function logs for more details.`,
