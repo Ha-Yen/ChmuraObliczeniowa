@@ -150,44 +150,104 @@ button {
 /* === ZMIANY DOTYCZĄCE DROPDOWNU "MOJE ROŚLINKI" === */
 .dropdown {
   position: relative;
-  display: inline-block; /* Zapewnia, że element obejmuje tylko swoją zawartość */
+
+  display: inline-block;
 }
 
 .dropdown-content {
-  /* Zastępuje display: none/block - teraz JS zarządza klasą .show i max-height */
-  max-height: 0; /* Początkowo zwinięty */
-  overflow: hidden; /* Ukryj przepełnioną zawartość */
-  transition: max-height 0.3s ease-out; /* Płynne rozwijanie/zwijanie */
+  display: none;
 
   position: absolute;
+
   background-color: var(--green-40);
-  /* Klucz do wyrównania po prawej stronie guzika: */
-  right: 0; /* Wyrównaj prawą krawędź dropdownu z prawą krawędzią rodzica (.dropdown) */
-  left: auto; /* Upewnij się, że nie ma domyślnego wyrównania do lewej */
 
-  width: 280px; /* PRZYKŁADOWA SZEROKOŚĆ - dostosuj to do szerokości formularza i zawartości */
+  width: 100px;
+
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+
   z-index: 1;
+
   font-size: 0.8rem;
+
   border-radius: 10px;
-  top: calc(100% + 5px); /* Odsuń od obrazka/guzika */
-  padding: 0;
-  margin: 0;
 }
 
-/* Klasa dodawana przez JavaScript, gdy dropdown ma być widoczny i rozszerzony */
-.dropdown-content.show {
-  max-height: 500px; /* Duża wartość, ustawiana dynamicznie przez JS, ale jako zabezpieczenie */
-  overflow-y: auto;
-}
-
-/* Styles dla linków w dropdownie (jeśli są inne niż li) */
 .dropdown-content a {
   color: var(--green-20);
+
   padding: 12px 16px;
+
   text-decoration: none;
+
   display: block;
+
   user-select: none;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-left {
+  position: relative;
+}
+
+.dropdown-left .dropdown-content {
+  display: none;
+
+  position: absolute;
+
+  background-color: var(--green-40);
+
+  width: 100px;
+
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+
+  z-index: 1;
+
+  font-size: 0.8rem;
+
+  border-radius: 10px;
+
+  top: calc(100% + 2px);
+
+  right: 0;
+
+  padding-top: 8px;
+}
+
+.dropdown-left:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-content:hover {
+  display: block;
+}
+
+.dropdown-left::after {
+  content: "";
+
+  position: absolute;
+
+  top: 20px;
+
+  right: 0;
+
+  width: 20px;
+
+  height: calc(100% - 20px + 8px);
+
+  z-index: 2;
+
+  pointer-events: auto;
+}
+
+.dropdown-left:not(:hover)::after {
+  pointer-events: none;
+}
+
+.dropdown-content:hover {
+  display: block;
 }
 
 /* === STYLE DLA LISTY ROŚLIN W DROPDOWNIE === */
