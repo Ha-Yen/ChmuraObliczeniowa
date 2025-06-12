@@ -150,34 +150,35 @@ button {
 /* === ZMIANY DOTYCZĄCE DROPDOWNU "MOJE ROŚLINKI" === */
 .dropdown {
   position: relative;
-  display: inline-block; /* Zapewnia, że element obejmuje tylko swoją zawartość */
+  display: inline-block;
 }
 
 .dropdown-content {
-  /* Zastępuje display: none/block - teraz JS zarządza klasą .show i max-height */
-  max-height: 0; /* Początkowo zwinięty */
-  overflow: hidden; /* Ukryj przepełnioną zawartość */
-  transition: max-height 0.3s ease-out; /* Płynne rozwijanie/zwijanie */
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
 
   position: absolute;
   background-color: var(--green-40);
-  /* Klucz do wyrównania po prawej stronie guzika: */
-  right: 0; /* Wyrównaj prawą krawędź dropdownu z prawą krawędzią rodzica (.dropdown) */
-  left: auto; /* Upewnij się, że nie ma domyślnego wyrównania do lewej */
 
-  width: 280px; /* PRZYKŁADOWA SZEROKOŚĆ - dostosuj to do szerokości formularza i zawartości */
+  /* >>> ZMIANA TUTAJ: Przesunięcie o 500px w prawo <<< */
+  left: 500px; /* Ustawia lewą krawędź dropdownu 500px od lewej krawędzi rodzica */
+  right: auto; /* Upewnia się, że 'right' nie koliduje */
+  /* >>> KONIEC ZMIANY <<< */
+
+  width: 280px;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
   font-size: 0.8rem;
   border-radius: 10px;
-  top: calc(100% + 5px); /* Odsuń od obrazka/guzika */
+  top: calc(100% + 5px);
   padding: 0;
   margin: 0;
 }
 
 /* Klasa dodawana przez JavaScript, gdy dropdown ma być widoczny i rozszerzony */
 .dropdown-content.show {
-  max-height: 500px; /* Duża wartość, ustawiana dynamicznie przez JS, ale jako zabezpieczenie */
+  max-height: 500px;
   overflow-y: auto;
 }
 
@@ -192,19 +193,19 @@ button {
 
 /* === STYLE DLA LISTY ROŚLIN W DROPDOWNIE === */
 #plants-list {
-  list-style-type: none; /* Usuwa domyślne znaczniki listy */
-  padding: 0; /* Usuwa cały padding z ul */
-  margin: 0; /* Usuwa cały margines z ul */
-  width: 100%; /* Upewnia się, że zajmuje całą szerokość swojego rodzica */
-  box-sizing: border-box; /* Zapewnia, że padding/border są uwzględnione w obliczeniach szerokości */
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #plants-list li {
-  color: #c0d6ba; /* Aktualny kolor tekstu */
+  color: #c0d6ba;
   background-color: transparent;
 
-  padding: 8px 15px; /* Padding wewnętrzny dla elementów listy */
-  margin: 0; /* Brak marginesu między elementami */
+  padding: 8px 15px;
+  margin: 0;
   line-height: 1.5;
   text-decoration: none;
   display: block;
@@ -479,7 +480,7 @@ button {
 }
 
 .days div:hover {
-  background-color: var(--green-30);
+  background-color: var(--green-30); /* Zmieniono na zmienną CSS */
 }
 
 .days div.empty {
@@ -488,7 +489,7 @@ button {
 }
 
 .days div.today {
-  background-color: var(--green-10);
+  background-color: var(--green-10); /* Poprawiono na zmienną CSS */
   color: white;
 }
 .days div.watered {
@@ -599,8 +600,6 @@ button {
   }
 
   /* Przeniesione i zmodyfikowane style listy roślin z sekcji media query */
-  /* Upewnij się, że nie koliduje z #plants-list */
-  /* Te ogólne reguły li/ul powinny być na początku pliku CSS, przed bardziej specyficznymi */
   ul {
     padding: 0;
     margin: 0;
@@ -627,7 +626,6 @@ button {
     color: #ffffff;
   }
   .plant-list {
-    /* Jeśli to odnosi się do #plants-list, użyj #plants-list */
     list-style-type: none;
     padding: 0;
     margin: 0;
@@ -635,7 +633,6 @@ button {
     box-sizing: border-box;
   }
   .add-plant-form {
-    /* To jest kontener formularza #plant-form-container */
     padding: 15px;
     margin: 0;
   }
