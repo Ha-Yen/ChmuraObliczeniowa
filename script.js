@@ -252,7 +252,7 @@ async function fetchPlants() {
 
       plants.forEach((plant, index) => {
         const li = document.createElement("li");
-        li.textContent = `${plant.name} (${plant.species})`;
+        li.textContent = `${plant.name}`;
         li.addEventListener("click", () => {
           currentPlantIndex = index;
           updatePlantDisplay(plants[currentPlantIndex]);
