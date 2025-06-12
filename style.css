@@ -1,10 +1,10 @@
 :root {
   --background: #1e1e1e;
-  --green-10: #beef9e;
-  --green-20: #a6c36f;
-  --green-30: #828c51;
-  --green-40: #335145;
-  --green-50: #1e352f;
+  --green-10: #beef9e; /* Jasny zielony */
+  --green-20: #a6c36f; /* Średni zielony */
+  --green-30: #828c51; /* Ciemniejszy zielony/oliwkowy */
+  --green-40: #335145; /* Ciemny zielony/szary */
+  --green-50: #1e352f; /* Najciemniejszy zielony */
 }
 
 body {
@@ -147,36 +147,224 @@ button {
   z-index: 0;
 }
 
+/* === ZMIANY DOTYCZĄCE DROPDOWNU "MOJE ROŚLINKI" === */
 .dropdown {
   position: relative;
   display: inline-block;
 }
+
 .dropdown-content {
-  display: none;
+  /* Zastępuje display: none/block - teraz JS zarządza klasą .show i max-height */
+  max-height: 0; /* Początkowo zwinięty */
+  overflow: hidden; /* Ukryj przepełnioną zawartość */
+  transition: max-height 0.3s ease-out; /* Płynne rozwijanie/zwijanie */
+
   position: absolute;
   background-color: var(--green-40);
-  width: 100px;
+  /* Dopasuj szerokość, aby pomieścić formularz. Dostosuj według potrzeb! */
+  width: 280px; /* PRZYKŁADOWA SZEROKOŚĆ - zwiększona dla formularza */
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  z-index: 1;
+  z-index: 1; /* Upewnij się, że jest na wierzchu */
   font-size: 0.8rem;
   border-radius: 10px;
+  top: calc(100% + 5px); /* Odsuń od obrazka, jeśli potrzebujesz */
+  right: 0; /* Wyrównaj do prawej strony obrazka */
+  padding: 0; /* Usuń domyślny padding, aby lista i formularz miały pełną kontrolę */
+  margin: 0; /* Usuń domyślny margines */
 }
+
+/* Klasa dodawana przez JavaScript, gdy dropdown ma być widoczny i rozszerzony */
+.dropdown-content.show {
+  /* max-height będzie ustawiana dynamicznie przez JS,
+       ale ustawienie dużej wartości tutaj jest zabezpieczeniem */
+  max-height: 500px; /* Duża wartość, aby pomieścić zawartość. Może być dynamicznie zmieniana przez JS */
+  overflow-y: auto; /* Dodaj scrollbar, jeśli zawartość przekroczy max-height */
+  /* Usunięto 'display: block;' ponieważ JS kontroluje widoczność poprzez max-height */
+}
+
+/* Styles dla linków w dropdownie (jeśli są inne niż li) */
 .dropdown-content a {
   color: var(--green-20);
-  padding: 12px 16px;
+  padding: 12px 16px; /* Zwiększony padding dla lepszej klikalności */
   text-decoration: none;
   display: block;
   user-select: none;
 }
-.dropdown:hover .dropdown-content {
-  display: block;
+
+/* Te reguły hover dla .dropdown-content są zbędne, jeśli kontrolujemy display/max-height przez JS */
+/* Zostawiam tylko, jeśli chcesz dodać jakiś efekt wizualny na hoverze samego kontenera */
+/* .dropdown-content:hover {
+  // Możesz dodać subtelny box-shadow lub inny efekt tutaj
+} */
+
+/* === STYLE DLA LISTY ROŚLIN W DROPDOWNIE === */
+#plants-list {
+  list-style-type: none; /* Usuwa domyślne znaczniki listy */
+  padding: 0; /* Usuwa cały padding z ul */
+  margin: 0; /* Usuwa cały margines z ul */
+  width: 100%; /* Upewnia się, że zajmuje całą szerokość swojego rodzica */
+  box-sizing: border-box; /* Zapewnia, że padding/border są uwzględnione w obliczeniach szerokości */
 }
+
+#plants-list li {
+  color: var(--green-10); /* Aktualny kolor tekstu */
+  background-color: transparent; /* Upewnij się, że tło elementu listy jest przezroczyste */
+
+  padding: 8px 15px; /* Padding wewnętrzny dla elementów listy */
+  margin: 0; /* Brak marginesu między elementami */
+  line-height: 1.5;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  text-align: left;
+  white-space: nowrap; /* Zapobiega zawijaniu tekstu */
+  overflow: hidden; /* Ukrywa nadmiar, jeśli użyto nowrap */
+  text-overflow: ellipsis; /* Dodaje wielokropek dla przepełnionego tekstu */
+}
+
+#plants-list li:hover {
+  background-color: var(
+    --green-30
+  ); /* KOLOR PODŚWIETLENIA HOVER: Ciemniejszy odcień zieleni */
+  color: #ffffff; /* KOLOR TEKSTU HOVER: Biały, dla kontrastu */
+}
+
+/* === STYLE DLA FORMULARZA DODAWANIA ROŚLIN === */
+#plant-form-container {
+  padding: 15px; /* Wewnętrzny padding dla kontenera formularza */
+  display: none; /* Domyślnie ukryty, pokazywany przez JS */
+  flex-direction: column; /* Aby elementy formularza były ułożone w kolumnie */
+  gap: 10px; /* Odstęp między elementami formularza */
+}
+
+#plant-form-container h3 {
+  color: var(--green-10); /* Kolor nagłówka formularza */
+  margin-top: 0; /* Usuń domyślny górny margines */
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+#plant-form-container label {
+  color: var(--green-20);
+  font-size: 0.9em;
+  margin-bottom: 2px; /* Mały odstęp pod etykietą */
+  display: block; /* Upewnij się, że label zajmuje całą szerokość */
+}
+
+#plant-form-container input[type="text"],
+#plant-form-container input[type="url"],
+#plant-form-container textarea {
+  width: calc(100% - 20px); /* Szerokość pola input z uwzględnieniem paddingu */
+  padding: 8px 10px;
+  margin-bottom: 5px; /* Mały odstęp pod inputem */
+  border: 1px solid var(--green-30); /* Kolor ramki */
+  border-radius: 5px;
+  background-color: var(--green-50); /* Ciemniejsze tło inputów */
+  color: #ffffff; /* Jasny tekst w inputach */
+  box-sizing: border-box; /* Ważne, aby padding i border były wliczone w szerokość */
+}
+
+#plant-form-container textarea {
+  resize: vertical; /* Pozwól użytkownikowi zmieniać wysokość textarea */
+  min-height: 60px; /* Minimalna wysokość textarea */
+}
+
+#plant-form-container input::placeholder,
+#plant-form-container textarea::placeholder {
+  color: var(--green-20); /* Kolor placeholderów */
+  opacity: 0.7;
+}
+
+#plant-form-container button[type="submit"] {
+  background-color: var(--green-20); /* Kolor tła przycisku submit */
+  color: var(--green-50);
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: background-color 0.2s, color 0.2s;
+  width: 100%;
+  margin-top: 10px; /* Odstęp nad przyciskiem */
+}
+
+#plant-form-container button[type="submit"]:hover {
+  background-color: var(--green-30); /* Ciemniejszy kolor po najechaniu */
+  color: #ffffff;
+}
+
+#plant-form-container hr {
+  border: 0;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin: 15px 0;
+}
+
+/* === STYLE DLA SEKCJI ZMIANY DATY PODLEWANIA (water-controls) === */
+.watering-controls {
+  padding: 15px 20px; /* Dopasuj padding do reszty sekcji */
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Odstęp między elementami */
+  margin-top: 15px; /* Odstęp od poprzedniej sekcji */
+  border-top: 1px solid rgba(255, 255, 255, 0.1); /* Delikatna linia oddzielająca */
+  background-color: var(--green-50); /* Kolor tła dla sekcji */
+  border-radius: 10px; /* Zaokrąglone rogi */
+}
+
+.watering-controls label {
+  color: var(--green-20);
+  font-size: 0.9em;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.watering-controls input[type="date"] {
+  width: calc(100% - 20px); /* Szerokość inputu daty */
+  padding: 8px 10px;
+  border: 1px solid var(--green-30);
+  border-radius: 5px;
+  background-color: var(--green-50);
+  color: #ffffff;
+  box-sizing: border-box;
+}
+
+/* Styl dla ikony kalendarza w input[type="date"] (tylko dla niektórych przeglądarek) */
+.watering-controls input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1); /* Odwróć kolory dla białej ikony na ciemnym tle */
+  cursor: pointer;
+}
+
+.watering-controls button {
+  background-color: var(--green-20);
+  color: var(--green-50);
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: background-color 0.2s, color 0.2s;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.watering-controls button:hover {
+  background-color: var(--green-30);
+  color: #ffffff;
+}
+
+/* === NIEZMIENIANE SEKCJE === */
 .dropdown-left {
   position: relative;
 }
 
 .dropdown-left .dropdown-content {
-  display: none;
+  /* Ta sekcja prawdopodobnie odnosi się do drugiego dropdowna (np. Wiki). */
+  /* Jeśli ma działać tak samo jak główny, potrzebowałby podobnych zmian JS/CSS */
+  display: none; /* Pozostawiamy display: none/block, jeśli JS go nie kontroluje */
   position: absolute;
   background-color: var(--green-40);
   width: 100px;
@@ -189,11 +377,8 @@ button {
   padding-top: 8px;
 }
 
+/* Zachowujemy hover dla dropdown-left, jeśli nie jest kontrolowany przez JS */
 .dropdown-left:hover .dropdown-content {
-  display: block;
-}
-
-.dropdown-content:hover {
   display: block;
 }
 
@@ -204,7 +389,6 @@ button {
   right: 0;
   width: 20px;
   height: calc(100% - 20px + 8px);
-
   z-index: 2;
   pointer-events: auto;
 }
@@ -213,9 +397,11 @@ button {
   pointer-events: none;
 }
 
-.dropdown-content:hover {
+/* Możesz usunąć to, jeśli ten dropdown też będzie kontrolowany przez JS */
+/* .dropdown-content:hover {
   display: block;
-}
+} */
+
 .top {
   padding: 0px 20px 0px 20px;
   display: flex;
@@ -311,7 +497,7 @@ button {
 }
 
 .days div:hover {
-  background-color: #eee;
+  background-color: var(--green-30); /* Zmieniono na zmienną CSS */
 }
 
 .days div.empty {
@@ -320,7 +506,7 @@ button {
 }
 
 .days div.today {
-  background-color: --green-10;
+  background-color: var(--green-10); /* Poprawiono na zmienną CSS */
   color: white;
 }
 .days div.watered {
@@ -429,33 +615,46 @@ button {
   .user-display {
     padding-right: 10px;
   }
+
+  /* Przeniesione i zmodyfikowane style listy roślin z sekcji media query */
   ul {
     padding: 0;
     margin: 0;
     list-style-type: none;
   }
 
+  /* To jest to samo co #plants-list li, więc możemy to uprościć, ale zostawiłem dla jasności */
   li {
     list-style-type: none;
-    padding: 5px, 10px;
-    margin: 10px;
-    color: var(--green-20);
+    padding: 8px 15px; /* Dopasowany padding */
+    margin: 0; /* Brak marginesu */
+    color: var(--green-10); /* Kolor tekstu */
     line-height: 1.5;
     text-decoration: none;
     display: block;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
     text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   li:hover {
     background-color: var(--green-30);
     color: #ffffff;
   }
+  /* Upewnij się, że ten selektor nie koliduje z #plants-list */
   .plant-list {
+    /* Jeśli to odnosi się do #plants-list, użyj #plants-list */
     list-style-type: none;
-    padding: 5px;
-    margin: 5px;
+    padding: 0; /* Zmienione na 0 */
+    margin: 0; /* Zmienione na 0 */
     width: 100%;
     box-sizing: border-box;
+  }
+  .add-plant-form {
+    /* To jest kontener formularza #plant-form-container */
+    padding: 15px; /* Dopasowany padding */
+    margin: 0; /* Zmienione na 0 */
   }
 }
