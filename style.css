@@ -429,10 +429,16 @@ button {
   .user-display {
     padding-right: 10px;
   }
+  ul {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+  }
+
   li {
     list-style-type: none;
-    padding: 0px, 10px;
-    margin: 0;
+    padding: 5px, 10px;
+    margin: 10px;
     color: var(--green-20);
     line-height: 1.5;
     text-decoration: none;
@@ -447,8 +453,8 @@ button {
   }
   .plant-list {
     list-style-type: none;
-    padding: 0;
-    margin: 0;
+    padding: 5px;
+    margin: 5px;
     width: 100%;
     box-sizing: border-box;
   }
