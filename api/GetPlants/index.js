@@ -15,14 +15,12 @@ module.exports = async function (context, req) {
     return;
   }
 
-  // >>> TYMCZASOWA ZMIANA TYLKO DLA CELÓW DEBUGOWANIA <<<
-  // Ta linia wymusza, aby targetPartitionKey ZAWSZE był "Ha-Yen"
+  // >>> TYMCZASOWA ZMIANA TYLKO DLA CELÓW DEBUGOWANIA (jeśli nadal używasz jej na localhost) <<<
   let targetPartitionKey = githubUserPartitionKey;
 
   // Poniższy blok kodu, który dekoduje clientPrincipal i potencjalnie zmienia
-  // targetPartitionKey na userId, jest teraz nieistotny, ponieważ
-  // targetPartitionKey już zostało ustawione na "Ha-Yen".
-  // Możesz go nawet zakomentować na czas testów, aby było to bardziej oczywiste:
+  // targetPartitionKey na userId, jest teraz nieistotny, jeśli `targetPartitionKey`
+  // jest ustawiony na stałe powyżej.
   /*
   const clientPrincipal = req.headers["x-ms-client-principal"];
   if (clientPrincipal) {
@@ -35,7 +33,7 @@ module.exports = async function (context, req) {
       const userId =
         principal.userId || principal.nameId || principal.userDetails;
       context.log(`Logged in user ID: ${userId}`);
-      // targetPartitionKey = userId; // Ta linia jest teraz ignorowana
+      // targetPartitionKey = userId;
     } catch (error) {
       context.log.error("Error decoding client principal:", error);
     }
@@ -47,7 +45,6 @@ module.exports = async function (context, req) {
   */
   // >>> KONIEC TYMCZASOWEJ ZMIANY <<<
 
-  // Budowanie filtra na podstawie wybranego PartitionKey (który teraz zawsze będzie "Ha-Yen")
   const filter = `PartitionKey eq '${targetPartitionKey}'`;
 
   try {
@@ -60,12 +57,19 @@ module.exports = async function (context, req) {
     for await (const entity of tableClient.listEntities({
       queryOptions: { filter: filter },
     })) {
+      // >>> WAŻNA POPRAWKA TUTAJ: DODANIE PartitionKey i RowKey <<<
       plants.push({
+        PartitionKey: entity.PartitionKey, // Upewnij się, że to jest dodane!
+        RowKey: entity.RowKey, // Upewnij się, że to jest dodane!
         name: entity.name,
         species: entity.species,
         lastWateringDate: entity.lastWateringDate,
         coverImageSrc: entity.coverImageSrc,
         wikipediaUrl: entity.wikipediaUrl,
+        // Tutaj możesz dodać inne właściwości encji, jeśli są potrzebne na front-endzie.
+        // Jeśli masz inne kolumny w tabeli, możesz je tutaj również przekazać:
+        // description: entity.description,
+        // ...
       });
     }
 
