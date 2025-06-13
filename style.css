@@ -162,7 +162,7 @@ button {
   background-color: var(--green-40);
 
   /* >>> ZMIANA TUTAJ: Przesunięcie o 500px w prawo <<< */
-  left: 280px; /* Ustawia lewą krawędź dropdownu 500px od lewej krawędzi rodzica */
+  /*left: 280px; /* Ustawia lewą krawędź dropdownu 500px od lewej krawędzi rodzica */
   right: auto; /* Upewnia się, że 'right' nie koliduje */
   /* >>> KONIEC ZMIANY <<< */
 
